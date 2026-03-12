@@ -16,6 +16,7 @@ def scale(x: int | None):
         return x
     return int(x * Region.SCALE)
 
+
 class Region:
     x: int
     y: int
@@ -65,8 +66,8 @@ class CardRenderer:
     """Renders card images based on card data"""
 
     # Standard card dimensions
-    #CARD_WIDTH = 375
-    #CARD_HEIGHT = 524
+    # CARD_WIDTH = 375
+    # CARD_HEIGHT = 524
     CARD_WIDTH = 750
     CARD_HEIGHT = 1050
     CARD_BLEED = 72
@@ -101,9 +102,9 @@ class CardRenderer:
         if (path, size) not in self.resized_cache:
             if str(path).endswith('.svg'):
                 vips_image = pyvips.Image.new_from_file(str(path))
-                scale = size[0]/vips_image.width
-                if scale > (size[1]/vips_image.height):
-                    scale = size[1]/vips_image.height
+                scale = size[0] / vips_image.width
+                if scale > (size[1] / vips_image.height):
+                    scale = size[1] / vips_image.height
                 vips_image = pyvips.Image.new_from_file(str(path), scale=scale)
                 image = Image.frombytes(
                     'RGBA',
@@ -138,7 +139,7 @@ class CardRenderer:
     def get_thumbnail(self, card):
         """ Renders a low res version of the front of a card """
         image = self.render_card_side(card, card.front)
-        image = image.resize((int(image.width*.5), int(image.height*.5)))
+        image = image.resize((int(image.width * .5), int(image.height * .5)))
         buffer = BytesIO()
         image.save(buffer, format='jpeg', quality=50)
         buffer.seek(0)
@@ -160,7 +161,7 @@ class CardRenderer:
         back.save(b_buffer, format=format, quality=quality, lossless=lossless)
         b_buffer.seek(0)
 
-        print(f'get_card_textures in {time.time()-t}')
+        print(f'get_card_textures in {time.time() - t}')
         return f_buffer, b_buffer
 
     def get_card_images(self, card, size):
@@ -305,11 +306,11 @@ class CardRenderer:
             card_image.paste(flip_lr, (bleed - flip_lr.width, bleed))
             card_image.paste(flip_ud, (bleed, bleed - flip_ud.height))
             card_image.paste(flip_ud, (bleed, height - bleed))
-            #corners, tl, tr, bl, br
-            card_image.paste(flip_corners, (bleed-flip_corners.width, bleed-flip_corners.height))
-            card_image.paste(flip_corners, (width-bleed, bleed-flip_corners.height))
-            card_image.paste(flip_corners, (bleed-flip_corners.width, height-bleed))
-            card_image.paste(flip_corners, (width-bleed, height-bleed))
+            # corners, tl, tr, bl, br
+            card_image.paste(flip_corners, (bleed - flip_corners.width, bleed - flip_corners.height))
+            card_image.paste(flip_corners, (width - bleed, bleed - flip_corners.height))
+            card_image.paste(flip_corners, (bleed - flip_corners.width, height - bleed))
+            card_image.paste(flip_corners, (width - bleed, height - bleed))
 
         for func in [
             self.render_level,
@@ -399,7 +400,7 @@ class CardRenderer:
                 if cb_value:
                     lines = ''
                     for slots, name, text in cb_value:
-                        lines += '\n' + '☐'*slots + f' <b>{name}.</b> {text}'
+                        lines += '\n' + '☐' * slots + f' <b>{name}.</b> {text}'
                     value += lines
 
             if not value:
@@ -412,7 +413,7 @@ class CardRenderer:
                 font = side.get(f'{field}_font', {})
                 polygon = side.get(f'{field}_polygon', None)
                 if polygon:
-                    polygon = [(point[0]*Region.SCALE, point[1]*Region.SCALE) for point in polygon]
+                    polygon = [(point[0] * Region.SCALE, point[1] * Region.SCALE) for point in polygon]
 
                 if font.get('rotation'):
                     temp_image = Image.new('RGBA', region.size, (0, 0, 0, 0))
@@ -421,7 +422,7 @@ class CardRenderer:
                         value,
                         Region({'x': 0, 'y': 0, 'height': region.height, 'width': region.width}),
                         font=font.get('font', 'regular'),
-                        font_size=font.get('size', 20)*Region.SCALE,
+                        font_size=font.get('size', 20) * Region.SCALE,
                         fill=font.get('color', '#231f20'),
                         outline=font.get('outline'),
                         outline_fill=font.get('outline_color'),
@@ -453,15 +454,15 @@ class CardRenderer:
             return
 
         region = Region(side['chaos_region'])
-        entry_height = region.height//len(value)
+        entry_height = region.height // len(value)
         font = side.get('chaos_font', {})
 
         for index, icon in enumerate(value):
             text = value[icon]
             text_region = {
-                'x': region.x+94,
-                'y': region.y+(index*entry_height),
-                'width': region.width-94,
+                'x': region.x + 94,
+                'y': region.y + (index * entry_height),
+                'width': region.width - 94,
                 'height': entry_height,
             }
             self.rich_text.render_text(
@@ -476,10 +477,10 @@ class CardRenderer:
                 alignment=font.get('alignment', 'left')
             )
 
-            overlay_path = self.overlays_path/f"chaos_{icon}.png"
+            overlay_path = self.overlays_path / f"chaos_{icon}.png"
             overlay_icon = Image.open(overlay_path).convert("RGBA")
-            overlay_icon = overlay_icon.resize((overlay_icon.width*2, overlay_icon.height*2))
-            card_image.paste(overlay_icon, (region.x, region.y+(index*entry_height)), overlay_icon)
+            overlay_icon = overlay_icon.resize((overlay_icon.width * 2, overlay_icon.height * 2))
+            card_image.paste(overlay_icon, (region.x, region.y + (index * entry_height)), overlay_icon)
 
     def render_connection_icons(self, card_image, side):
         try:
@@ -491,13 +492,13 @@ class CardRenderer:
                 region = Region(side.get('connection_region'))
                 connection_image = self.get_resized_cached(self.overlays_path / 'svg' / f"connection_{value}.svg", region.size)
 
-                padding = int(24*Region.SCALE)
+                padding = int(24 * Region.SCALE)
                 base_image = self.get_resized_cached(
                     self.overlays_path / "location_hi_base.png",
                     (region.width + padding, region.height + padding)
                 )
                 card_image.paste(base_image, region.pos, base_image)
-                card_image.paste(connection_image, (region.x+int(12*Region.SCALE), region.y+int(12*Region.SCALE)), connection_image)
+                card_image.paste(connection_image, (region.x + int(12 * Region.SCALE), region.y + int(12 * Region.SCALE)), connection_image)
 
             # outgoing connections
             value = side.get('connections')
@@ -509,9 +510,9 @@ class CardRenderer:
             for index, icon in enumerate(value):
                 if not icon or icon == "None":
                     continue
-                region = Region(side.get(f'connection_{index+1}_region'))
+                region = Region(side.get(f'connection_{index + 1}_region'))
                 connection_image = self.get_resized_cached(self.overlays_path / 'svg' / f"connection_{icon}.svg", region.size)
-                card_image.paste(connection_image, (region.x+int(12*Region.SCALE), region.y+int(12*Region.SCALE)), connection_image)
+                card_image.paste(connection_image, (region.x + int(12 * Region.SCALE), region.y + int(12 * Region.SCALE)), connection_image)
         except Exception as e:
             print('error in connection', e)
 
@@ -521,7 +522,7 @@ class CardRenderer:
         if not value:
             return
 
-        box_path = self.overlays_path/f"skill_box_{side.get_class()}.png"
+        box_path = self.overlays_path / f"skill_box_{side.get_class()}.png"
         box_image = self.get_cached(box_path)
         box_image = box_image.resize((int(box_image.width * Region.SCALE * 2), int(box_image.height * Region.SCALE * 2)))
 
@@ -529,7 +530,7 @@ class CardRenderer:
             icon_path = self.overlays_path / 'svg' / f"skill_icon_{icon}.svg"
             icon_image = self.get_resized_cached(icon_path, (scale(102), scale(102)))
             card_image.paste(box_image, (0, scale(index * 164 + 324 + 72)), box_image)
-            card_image.paste(icon_image, (scale(72+40), scale(index * 164 + 352 + 72)), icon_image)
+            card_image.paste(icon_image, (scale(72 + 40), scale(index * 164 + 352 + 72)), icon_image)
 
     def render_health(self, card_image, side):
         """ Add health and sanity overlay, if needed. """
@@ -542,7 +543,7 @@ class CardRenderer:
                 if (not region) or value is None:
                     continue
 
-            overlay_path = self.overlays_path/f"{stat}_base.png"
+            overlay_path = self.overlays_path / f"{stat}_base.png"
             overlay_icon = Image.open(overlay_path).convert("RGBA")
             overlay_icon = overlay_icon.resize((region.width, region.height))
             center_x = region.x
@@ -561,9 +562,9 @@ class CardRenderer:
 
         icon = Image.open(side.card.expansion.icon, formats=['png', 'jpg']).convert('RGBA')
         if icon.width > icon.height:
-            icon = icon.resize((region.width, int(region.height*(icon.height/icon.width))))
+            icon = icon.resize((region.width, int(region.height * (icon.height / icon.width))))
         else:
-            icon = icon.resize((int(region.width*(icon.width/icon.height)), region.height))
+            icon = icon.resize((int(region.width * (icon.width / icon.height)), region.height))
 
         # invert
         alpha = icon.getchannel('A')
@@ -629,9 +630,9 @@ class CardRenderer:
             icon_path = icon_path.absolute()
 
         icon = self.get_cached(icon_path)
-        scale = min(region.width/icon.width, region.height/icon.height)
-        icon = self.get_resized_cached(icon_path, (int(icon.width*scale), int(icon.height*scale)))
-        card_image.paste(icon, (region.x + (region.width-icon.width)//2, region.y + (region.height-icon.height)//2), icon)
+        scale = min(region.width / icon.width, region.height / icon.height)
+        icon = self.get_resized_cached(icon_path, (int(icon.width * scale), int(icon.height * scale)))
+        card_image.paste(icon, (region.x + (region.width - icon.width) // 2, region.y + (region.height - icon.height) // 2), icon)
 
     def render_slots(self, card_image, side):
         """Render the slot icons """
@@ -643,11 +644,11 @@ class CardRenderer:
             return
 
         for index, slot in enumerate(slots):
-            region = Region(side.get(f'slot_{index+1}_region', {}))
+            region = Region(side.get(f'slot_{index + 1}_region', {}))
             if not region:
                 continue
 
-            path = self.overlays_path/f'slot_{slot}.png'
+            path = self.overlays_path / f'slot_{slot}.png'
             slot_image = Image.open(path).convert("RGBA")
             slot_image = slot_image.resize(region.size)
             card_image.paste(slot_image, region.pos, slot_image)
@@ -659,11 +660,11 @@ class CardRenderer:
                 value = int(side.get(token, "0"))
                 if not value:
                     continue
-                icon_path = self.overlays_path/f"{token}.png"
+                icon_path = self.overlays_path / f"{token}.png"
                 raw_icon = self.get_cached(icon_path)
-                raw_icon = self.get_resized_cached(icon_path, (int(raw_icon.width*Region.SCALE), int(raw_icon.height*Region.SCALE)))
+                raw_icon = self.get_resized_cached(icon_path, (int(raw_icon.width * Region.SCALE), int(raw_icon.height * Region.SCALE)))
                 for i in range(value):
-                    region = Region(side[f'{token}{i+1}_region'])
+                    region = Region(side[f'{token}{i + 1}_region'])
                     if not region:
                         continue
                     card_image.paste(raw_icon, (region.x, region.y), raw_icon)
@@ -697,7 +698,7 @@ class CardRenderer:
             return
 
         if not include_bleed:
-            template = self.get_resized_cached(template_path, (card_image.width-bleed*2, card_image.height-bleed*2))
+            template = self.get_resized_cached(template_path, (card_image.width - bleed * 2, card_image.height - bleed * 2))
             card_image.paste(template, (bleed, bleed), template)
         else:
             template = self.get_resized_cached(template_path, (card_image.width, card_image.height))
@@ -778,7 +779,7 @@ class CardRenderer:
         # Render each class symbol
         for index, cls in enumerate(classes):
             symbol_path = self.overlays_path / f"class_symbol_{cls}.png"
-            region = Region(side.get(f"class_symbol_{index+1}_region"))
+            region = Region(side.get(f"class_symbol_{index + 1}_region"))
 
             symbol = self.get_resized_cached(symbol_path, region.size)
             card_image.paste(symbol, (region.x, region.y), symbol)
@@ -796,12 +797,26 @@ class CardRenderer:
 
         region = Region(side['chaos_region'])
         font = side.get("chaos_font", {})
+        slot_count = max(4, len(entries))
+        entry_height = region.height / slot_count
+        target_icon_size = card_image.width * 0.10
+        icon_offset_x = card_image.width / 40
+        text_gap_x = card_image.width / 70
         for index, entry in enumerate(entries):
             tokens = entry['token']
-            y = int(region.y + region.height/len(entries)*index)
+            row_y = region.y + entry_height * index
 
             if not isinstance(tokens, list):
                 tokens = [tokens]
+
+            size = min(
+                target_icon_size,
+                entry_height,
+                (region.width / 3) / len(tokens)
+            )
+            size_int = int(size)
+            icon_y = int(row_y + (entry_height - size) / 2)
+            icon_start_x = int(region.x + icon_offset_x)
 
             for token_index, token in enumerate(tokens):
                 try:
@@ -810,26 +825,44 @@ class CardRenderer:
                     print(e)
                     continue
 
-                size = min(
-                    region.height/5.1,
-                    (region.width/3)/len(tokens)
-                )
+                token_image = token_image.resize((size_int, size_int))
+                x = int(icon_start_x + token_image.width * token_index)
+                card_image.paste(token_image, (x, icon_y), token_image)
 
-                token_image = token_image.resize((int(size), int(size)))
-                x = int(region.x + token_image.width * token_index)
-                card_image.paste(token_image, (x, y), token_image)
+            text_height = size_int
+            icon_group_width = size_int * len(tokens)
+            text_x = int(icon_start_x + icon_group_width + text_gap_x)
+            text_width = int(region.x + region.width - text_x)
+            if text_width <= 0:
+                continue
 
+            text = str(entry.get('text', ''))
+            text = text.replace('\r\n', '\n').replace('\r', '\n')
+
+            icon_center_y = icon_y + size_int / 2
+            max_text_height = int(entry_height)
+
+            temp_image = Image.new('RGBA', (text_width, max_text_height), (0, 0, 0, 0))
             self.rich_text.render_text(
-                card_image,
-                entry['text'],
-                Region.unscaled({'x': (region.x+region.width//3), 'y': y, 'height': region.height//len(entries), 'width': (2*region.width)//3}),
+                temp_image,
+                text,
+                Region.unscaled({'x': 0, 'y': 0, 'height': max_text_height, 'width': text_width}),
                 font=font.get('font', 'regular'),
-                font_size=int(font.get('size', 32)*Region.SCALE),
+                font_size=int(font.get('size', 32) * Region.SCALE),
                 fill=font.get('color', '#231f20'),
-                outline=int(font.get('outline', 0)*Region.SCALE),
+                outline=int(font.get('outline', 0) * Region.SCALE),
                 outline_fill=font.get('outline_color'),
                 alignment=font.get('alignment', 'left'),
             )
+
+            bbox = temp_image.getbbox()
+            if bbox:
+                actual_height = bbox[3] - bbox[1]
+                actual_width = bbox[2] - bbox[0]
+                cropped = temp_image.crop(bbox)
+                text_y_pos = int(icon_center_y - actual_height / 2)
+                text_y_pos = max(int(row_y), min(text_y_pos, int(row_y + entry_height - actual_height)))
+                card_image.paste(cropped, (text_x, text_y_pos), cropped)
 
     def render_customizable(self, card_image, side):
         """ Renders the scenario reference cards.
@@ -849,7 +882,7 @@ class CardRenderer:
         font = side.get("text_font", {})
         parsed_text = ""
         for entry in entries:
-            parsed_text += '\n' + int(entry[0])*'☐'
+            parsed_text += '\n' + int(entry[0]) * '☐'
             parsed_text += f' <b>{entry[1]}.</b> '
             parsed_text += entry[2]
 
